@@ -34,7 +34,7 @@ CompBase *GenParticle::fgCompare = 0;
 CompBase *Photon::fgCompare = CompPT<Photon>::Instance();
 CompBase *Electron::fgCompare = CompPT<Electron>::Instance();
 CompBase *Muon::fgCompare = CompPT<Muon>::Instance();
-
+CompBase *Tau::fgCompare = CompPT<Tau>::Instance();
 CompBase *Jet::fgCompare = CompPT<Jet>::Instance();
 CompBase *Track::fgCompare = CompPT<Track>::Instance();
 CompBase *Tower::fgCompare = CompE<Tower>::Instance();
@@ -86,6 +86,15 @@ TLorentzVector Muon::P4() const
 {
   TLorentzVector vec;
   vec.SetPtEtaPhiM(PT, Eta, Phi, 0.0);
+  return vec;
+}
+
+//------------------------------------------------------------------------------
+
+TLorentzVector Tau::P4() const
+{
+  TLorentzVector vec;
+  vec.SetPtEtaPhiM(PT, Eta, Phi, Mass);
   return vec;
 }
 

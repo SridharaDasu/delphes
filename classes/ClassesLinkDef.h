@@ -59,6 +59,7 @@
 #pragma link C++ class CscCluster+;
 
 #pragma link C++ class Jet+;
+#pragma link C++ class Tau+;
 #pragma link C++ class Track+;
 #pragma link C++ class Tower+;
 #pragma link C++ class ParticleFlowCandidate+;

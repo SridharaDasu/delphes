@@ -418,7 +418,8 @@ tmp/modules/ModulesDict.$(SrcSuf): \
 	modules/ExampleModule.h \
 	modules/LLPFilter.h \
 	modules/CscClusterEfficiency.h \
-	modules/CscClusterId.h
+	modules/CscClusterId.h \
+	modules/TauReconstructor.h
 tmp/modules/ModulesDict$(PcmSuf): \
 	tmp/modules/ModulesDict.$(SrcSuf)
 ModulesDict$(PcmSuf): \
@@ -1010,6 +1011,11 @@ tmp/modules/TaggingParticlesSkimmer.$(ObjSuf): \
 	external/ExRootAnalysis/ExRootClassifier.h \
 	external/ExRootAnalysis/ExRootFilter.h \
 	external/ExRootAnalysis/ExRootResult.h
+tmp/modules/TauReconstructor.$(ObjSuf): \
+	modules/TauReconstructor.$(SrcSuf) \
+	modules/TauReconstructor.h \
+	classes/DelphesClasses.h \
+	classes/DelphesFactory.h
 tmp/modules/TauTagging.$(ObjSuf): \
 	modules/TauTagging.$(SrcSuf) \
 	modules/TauTagging.h \
@@ -1055,7 +1061,8 @@ tmp/modules/TrackCovariance.$(ObjSuf): \
 	classes/DelphesClasses.h \
 	external/TrackCovariance/SolGeom.h \
 	external/TrackCovariance/SolGridCov.h \
-	external/TrackCovariance/ObsTrk.h
+	external/TrackCovariance/ObsTrk.h \
+	classes/DelphesFormula.h
 tmp/modules/TrackPileUpSubtractor.$(ObjSuf): \
 	modules/TrackPileUpSubtractor.$(SrcSuf) \
 	modules/TrackPileUpSubtractor.h \
@@ -1252,6 +1259,7 @@ DELPHES_OBJ +=  \
 	tmp/modules/SimpleCalorimeter.$(ObjSuf) \
 	tmp/modules/StatusPidFilter.$(ObjSuf) \
 	tmp/modules/TaggingParticlesSkimmer.$(ObjSuf) \
+	tmp/modules/TauReconstructor.$(ObjSuf) \
 	tmp/modules/TauTagging.$(ObjSuf) \
 	tmp/modules/TimeOfFlight.$(ObjSuf) \
 	tmp/modules/TimeSmearing.$(ObjSuf) \
@@ -1912,6 +1920,9 @@ modules/FastJetGridMedianEstimator.h: \
 	classes/DelphesModule.h
 	@touch $@
 modules/LLPFilter.h: \
+	classes/DelphesModule.h
+	@touch $@
+modules/TauReconstructor.h: \
 	classes/DelphesModule.h
 	@touch $@
 external/fastjet/internal/MinHeap.hh: \

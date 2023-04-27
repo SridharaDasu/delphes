@@ -351,6 +351,35 @@ public:
 
 //---------------------------------------------------------------------------
 
+class Tau: public SortableObject
+{
+public:
+
+  Float_t PT;
+  Float_t Eta;
+  Float_t Phi;
+  Float_t Mass;
+
+  Float_t T;
+
+  Int_t Charge;
+  Int_t nProngs;
+  Int_t nPhotons;
+  Int_t nNHadrons;
+
+  Float_t isolation;
+  
+  TLorentzVector P4() const;
+  
+  static CompBase *fgCompare; //!
+  const CompBase *GetCompare() const { return fgCompare; }
+
+  ClassDef(Tau, 5)
+  
+};
+
+//---------------------------------------------------------------------------
+
 class Jet: public SortableObject
 {
 public:
