@@ -45,8 +45,14 @@ private:
   Double_t fMaxTauIsolDeltaR;
   Double_t fMaxTauCoreDeltaR;
 
-  TObjArray *fInputArray;
-  TIterator *fItInputArray;
+  TObjArray *fchadronInputArray;
+  TIterator *fchadronIterator;
+
+  TObjArray *fnhadronInputArray;
+  TIterator *fnhadronIterator;
+
+  TObjArray *fphotonInputArray;
+  TIterator *fphotonIterator;
 
   TObjArray *fOutputArray;
 

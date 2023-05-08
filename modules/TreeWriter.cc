@@ -83,6 +83,7 @@ void TreeWriter::Init()
   fClassMap[Rho::Class()] = &TreeWriter::ProcessRho;
   fClassMap[Weight::Class()] = &TreeWriter::ProcessWeight;
   fClassMap[HectorHit::Class()] = &TreeWriter::ProcessHectorHit;
+  fClassMap[Tau::Class()] = &TreeWriter::ProcessTaus;
 
   TBranchMap::iterator itBranchMap;
   map<TClass *, TProcessMethod>::iterator itClassMap;
@@ -1061,6 +1062,49 @@ void TreeWriter::ProcessHectorHit(ExRootTreeBranch *branch, TObjArray *array)
     entry->S = position.Z();
 
     entry->Particle = candidate->GetCandidates()->At(0);
+  }
+}
+
+//------------------------------------------------------------------------------
+void TreeWriter::ProcessTaus(ExRootTreeBranch *branch, TObjArray *array)
+{
+  TIter iterator(array);
+  Candidate *candidate = 0;
+  Tau *entry = 0;
+  Double_t pt, signPz, cosTheta, eta, rapidity;
+  const Double_t c_light = 2.99792458E8;
+
+  array->Sort();
+
+  // loop over all taus
+  iterator.Reset();
+  while((candidate = static_cast<Candidate *>(iterator.Next())))
+  {
+    TIter it1(candidate->GetCandidates());
+    const TLorentzVector &momentum = candidate->Momentum;
+    const TLorentzVector &position = candidate->Position;
+
+    pt = momentum.Pt();
+    cosTheta = TMath::Abs(momentum.CosTheta());
+    signPz = (momentum.Pz() >= 0.0) ? 1.0 : -1.0;
+    eta = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Eta());
+    rapidity = (cosTheta == 1.0 ? signPz * 999.9 : momentum.Rapidity());
+
+    entry = static_cast<Tau *>(branch->NewEntry());
+
+    entry->Eta = eta;
+    entry->Phi = momentum.Phi();
+    entry->PT = pt;
+    entry->Mass = momentum.M();
+    entry->T = position.T() * 1.0E-3 / c_light;
+
+    entry->Charge = candidate->Charge;
+    entry->nProngs = candidate->NCharged;
+    entry->nPhotons = candidate->NNeutrals;
+    entry->nNHadrons = candidate->Nclusters;  // This variable is "stolen"
+      
+    entry->isolation = candidate->IsolationVar;
+
   }
 }
 

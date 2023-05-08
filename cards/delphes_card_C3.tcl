@@ -661,10 +661,10 @@ module TauTagging TauTagging {
 ###################################
 
 module TauReconstructor TauReconstructor {
-  set TrackInputArray ECal/eflowPhotons
-  set TrackInputArray HCal/eflowTracks
-  set TrackInputArray HCal/eflowNeutralHadrons
-  set TauOutputArray recoTaus
+  set InputArray ECal/eflowPhotons
+  set InputArray HCal/eflowTracks
+  set InputArray HCal/eflowNeutralHadrons
+  set OutputArray taus
   set MinTauSeedPT 5.0
   set MaxTauSeedEta 2.5
   set MaxTauIsolDeltaR 0.5
@@ -707,6 +707,8 @@ module TreeWriter TreeWriter {
   add Branch UniqueObjectFinder/electrons Electron Electron
   add Branch UniqueObjectFinder/muons Muon Muon
   add Branch UniqueObjectFinder/jets Jet Jet
+
+  add Branch TauReconstructor/taus Tau Tau
   
   add Branch MissingET/momentum MissingET MissingET
   add Branch ScalarHT/energy ScalarHT ScalarHT

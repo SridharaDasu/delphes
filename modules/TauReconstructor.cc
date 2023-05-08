@@ -15,15 +15,20 @@ void TauReconstructor::Init() {
   fMaxTauSeedEta = GetDouble("MaxTauSeedEta", 2.5);
   fMaxTauIsolDeltaR = GetDouble("MaxTauIsolDeltaR", 0.5);
   fMaxTauCoreDeltaR = GetDouble("MaxTauCoreDeltaR", 0.3);
-  fInputArray = ImportArray(GetString("InputArray", "TrackSmearing/tracks"));
-  fItInputArray = fInputArray->MakeIterator();
+  fchadronInputArray = ImportArray(GetString("InputArray", "HCal/eflowTracks"));
+  fchadronIterator = fchadronInputArray->MakeIterator();
+  fphotonInputArray = ImportArray(GetString("InputArray", "ECal/eflowPhotons"));
+  fphotonIterator = fphotonInputArray->MakeIterator();
+  fnhadronInputArray = ImportArray(GetString("InputArray", "HCal/eflowNeutralHadrons"));
+  fnhadronIterator = fnhadronInputArray->MakeIterator();
   fOutputArray = ExportArray(GetString("OutputArray", "taus"));
 }
 
 void TauReconstructor::Process() {
+  DelphesFactory *factory = GetFactory();
   std::vector <Candidate *> trackSeeds; 
-  fItInputArray->Reset();
-  while(Candidate *track = static_cast<Candidate *>(fItInputArray->Next())) {
+  fchadronIterator->Reset();
+  while(Candidate *track = static_cast<Candidate *>(fchadronIterator->Next())) {
     if(track->Momentum.Pt() < fMinTauSeedPT || fabs(track->Momentum.Eta()) > fMaxTauSeedEta)
       continue;
     else
@@ -33,13 +38,13 @@ void TauReconstructor::Process() {
   TLorentzVector recoTau;
   for (UInt_t i = 0; i < trackSeeds.size(); i++) {
     Candidate *track = trackSeeds[i];
-    fItInputArray->Reset();
+    fchadronIterator->Reset();
     bool selected = true;
     recoTau.SetPtEtaPhiM(track->Momentum.Pt(), track->Momentum.Eta(), track->Momentum.Phi(), track->Momentum.M());
     double isolation = 0;
     int charge = track->Charge;
     int nProngs = 1;
-    while(Candidate* fragment = static_cast<Candidate *>(fItInputArray->Next())) {
+    while(Candidate* fragment = static_cast<Candidate *>(fchadronIterator->Next())) {
       // if (entry < 10) cout << "Max: EFTrack[" << t << "] = (" << track->PT << ", " << track->Eta << ", " << track->Phi << ", " << track->Mass << ")";
       if (track != fragment) {
 	double deltaR = recoTau.DeltaR(fragment->Momentum);
@@ -65,40 +70,34 @@ void TauReconstructor::Process() {
     }
     // Add in photons (mostly from pizero decays) if within 0.3, and for isolation if between 0.3-0.5
     int nPhotons = 0;
-    /*
-    for (Int_t a = t + 1; a < branchEFPhotons->GetEntries(); ++a) {
-      Tower *fragment = (Tower*) branchEFPhotons->At(a);
-      fragmentP4.SetPtEtaPhiM(fragment->ET, fragment->Eta, fragment->Phi, 0.);
-      double deltaR = recoTau.DeltaR(fragmentP4);
+    fphotonIterator->Reset();
+    while(Candidate* fragment = static_cast<Candidate *>(fphotonIterator->Next())) {
+      double deltaR = recoTau.DeltaR(fragment->Momentum);
       if(deltaR < fMaxTauIsolDeltaR) {
 	if (deltaR < fMaxTauCoreDeltaR) {
-	  recoTau += fragmentP4;
+	  recoTau += fragment->Momentum;
 	  nPhotons++;
 	}
 	else {
-	  isolation += fragment->ET;
+	  isolation += fragment->Momentum.Pt();
 	}
       }
     }
-    */
     // Consider non-pizero remnant neutral hadrons only for isolation
     int nNHadrons = 0;
-    /*
-    for (Int_t a = t + 1; a < branchEFNHadrons->GetEntries(); ++a) {
-      Tower *fragment = (Tower*) branchEFNHadrons->At(a);
-      fragmentP4.SetPtEtaPhiM(fragment->ET, fragment->Eta, fragment->Phi, 0.);
-      double deltaR = recoTau.DeltaR(fragmentP4);
+    fnhadronIterator->Reset();
+    while(Candidate* fragment = static_cast<Candidate *>(fphotonIterator->Next())) {
+      double deltaR = recoTau.DeltaR(fragment->Momentum);
       if(deltaR < fMaxTauIsolDeltaR) {
 	if (deltaR < fMaxTauCoreDeltaR) {
-	  recoTau += fragmentP4;
+	  recoTau += fragment->Momentum;
 	  nNHadrons++;
 	}
 	else {
-	  isolation += fragment->ET;
+	  isolation += fragment->Momentum.Pt();
 	}
       }
     }
-    */
     if (selected) {
       // if (entry < 10) cout << endl << "SelRecoTau = (" << recoTau.Pt() << ", " << recoTau.Eta() << ", " << recoTau.Phi() << ", "<< recoTau.M() << ")" << endl;
       if (nProngs <= 5) {
@@ -114,10 +113,26 @@ void TauReconstructor::Process() {
 	tau.nNHadrons = nNHadrons;
 	tau.isolation = isolation;
 	recTaus.push_back(tau);
+	Candidate* candidate = factory->NewCandidate();
+	candidate->Momentum.SetPtEtaPhiM(recoTau.Pt(), recoTau.Eta(), recoTau.Phi(), recoTau.M());
+	candidate->Mass = recoTau.M();
+	// candidate->T = track->T;
+	candidate->Charge = charge;
+	candidate->NCharged = nProngs;
+	candidate->NNeutrals = nPhotons;
+	candidate->Nclusters = nNHadrons; // Steal this variable
+	candidate->IsolationVar = isolation;
+	fOutputArray->Add(candidate);
       }
     } // Selected objects
   } // All seeds above 5 GeV
-  
+  if (recTaus.size() > 0) {
+    std::cout << "N recoTaus = " << recTaus.size() << std::endl;
+    for (UInt_t i = 0; i < recTaus.size(); i++) {
+      Tau tau = recTaus[i];
+      std::cout << tau.PT << tau.Eta << tau.Phi << tau.Mass << tau.Charge << tau.nProngs << tau.nPhotons << tau.nNHadrons << tau.isolation << std::endl;
+    }
+  }
 }
 
 void TauReconstructor::Finish() {

@@ -67,6 +67,7 @@ private:
   void ProcessRho(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessWeight(ExRootTreeBranch *branch, TObjArray *array);
   void ProcessHectorHit(ExRootTreeBranch *branch, TObjArray *array);
+  void ProcessTaus(ExRootTreeBranch *branch, TObjArray *array);
 
 
 #if !defined(__CINT__) && !defined(__CLING__)
